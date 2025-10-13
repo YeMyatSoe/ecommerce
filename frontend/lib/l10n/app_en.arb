@@ -1,0 +1,18 @@
+{
+  "appTitle": "STSWM",
+  "@appTitle": {},
+  "login": "LogIn",
+  "@login": {},
+  "darkMode": "Dark Mode",
+  "@darkMode": {},
+  "language": "Language",
+  "@language": {},
+  "notifications": "Enable Notifications",
+  "@notifications": {},
+  "appVersion": "1.0.0",
+  "@appVersion": {},
+  "logOut": "Log Out",
+  "@logOut": {},
+  "setTing": "Setting",
+  "@setTing": {}
+}

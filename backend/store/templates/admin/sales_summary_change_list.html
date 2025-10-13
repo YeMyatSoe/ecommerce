@@ -1,0 +1,130 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    /* Card styling */
+    .chart-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 900px;
+      width: 100%;
+    }
+
+    /* Responsive canvas container */
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+    }
+
+    /* Heading style */
+    .chart-card h2 {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+  {{ block.super }}
+
+  <div class="chart-card">
+    <h2>Sales Summary Chart</h2>
+    <div class="chart-container">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+          label: 'Sales',
+          data: {{ chart_data|safe }},
+          borderColor: 'rgba(54, 162, 235, 0.8)',
+          backgroundColor: 'rgba(54, 162, 235, 0.3)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          borderWidth: 3,
+          hoverBorderWidth: 4,
+          hoverBackgroundColor: 'rgba(54, 162, 235, 0.5)',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: '#333',
+            titleColor: '#fff',
+            bodyColor: '#eee',
+            cornerRadius: 4,
+            padding: 8,
+          },
+          legend: {
+            labels: {
+              font: {
+                size: 14,
+                weight: 'bold',
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: 'Sales Over Time',
+            font: {
+              size: 18,
+              weight: 'bold',
+            }
+          }
+        },
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        },
+        scales: {
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45,
+              color: '#555',
+              font: {
+                size: 12,
+              }
+            },
+            grid: {
+              display: false,
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#555',
+              font: {
+                size: 12,
+              }
+            },
+            grid: {
+              color: '#eee',
+            }
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "201351721719",
+    "project_id": "ecommerce-acfd6",
+    "storage_bucket": "ecommerce-acfd6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:201351721719:android:0cc56f8c91467991d799f2",
+        "android_client_info": {
+          "package_name": "com.NCA.ecommerce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqPXQcEHsvHQ0ZmKmCyKYdnukl57YJrE8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

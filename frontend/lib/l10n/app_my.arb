@@ -1,0 +1,22 @@
+
+{
+    "appTitle": "ကျွန်ုပ်၏ဆိုင်",
+    "@appTitle": {},
+    "login": "၀င်ရန်",
+    "@login": {},
+    "darkMode": "အမှောင်အလင်း",
+    "@darkMode": {},
+    "Product" : "ကုန်ပစ္စည်း",
+    "@Product": {},
+    "language": "ဘာသာစကား",
+    "@language": {},
+    "notifications": "သတိပေးချက်များဖွင့်ရန်",
+    "@notifications": {},
+    "appVersion": "1.0.0",
+    "@appVersion": {},
+    "logOut": "ထွက်ရန်",
+    "@logOut": {},
+    "setTing" : "အပြင်အဆင်",
+    "@setTing": {} 
+}
+  
