@@ -3,4 +3,5 @@ __pycache__/
 node_modules/ 
 .vscode/ 
 .idea/ 
-/frontend/build/
+backend/backend/.env
+

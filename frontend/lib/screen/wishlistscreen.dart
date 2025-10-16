@@ -84,17 +84,22 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue, // background
-      appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        title: Text(
-          "Wishlist",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
+        backgroundColor: Colors.transparent, // let gradient show
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF6A11CB), // deep purple
+                Color(0xFF2575FC), // blue mix
+              ],
+            ),
+          ),
+      child: SafeArea(
+
         child: isLoading
             ? Center(child: CircularProgressIndicator())
             : wishlists.isEmpty
@@ -105,10 +110,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       double childAspectRatio = 0.65;
 
                       if (constraints.maxWidth >= 1200) {
-                        crossAxisCount = 4;
-                        childAspectRatio = 0.9;
+                        crossAxisCount = 6;
+                        childAspectRatio = 0.8;
                       } else if (constraints.maxWidth >= 800) {
-                        crossAxisCount = 3;
+                        crossAxisCount = 6;
                         childAspectRatio = 0.8;
                       } else if (constraints.maxWidth >= 600) {
                         crossAxisCount = 2;
@@ -132,147 +137,127 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     },
                   ),
       ),
+    ),
     );
   }
   Widget _buildProductCard(Product product) {
     return GestureDetector(
       onTap: () => _navigateToProductDetail(context, product),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white.withOpacity(0.2),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.15),
-                  Colors.white.withOpacity(0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Image + Stock Badge
-                Expanded(
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                        child: Image.network(
-                          product.image1.isNotEmpty ? product.image1 : 'fallback_image_url',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              'assets/placeholder_image.png',
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            );
-                          },
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: _getStockStatusColor(product),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _getStockStatusText(product),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+      child: _buildLiquidGlass(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: Image.network(
+                      product.image1,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Center(
+                          child: Icon(Icons.broken_image, size: 50)),
+                    ),
                   ),
-                ),
-
-                // Product Info
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        product.name,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '\$${product.price}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green,
-                        ),
-                      ),
-                      Text(
-                        'Rating: ${product.rating}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Button
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.withOpacity(0.7),
-                      shape: RoundedRectangleBorder(
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: product.stock > 0 ? Colors.green : Colors.red,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      minimumSize: const Size.fromHeight(36),
-                    ),
-                    onPressed: () => _navigateToProductDetail(context, product),
-                    child: const Text(
-                      'View',
-                      style: TextStyle(fontSize: 14, color: Colors.white),
+                      child: Text(
+                        product.stock > 0 ? "In Stock" : "Out of Stock",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            Padding(
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12.0, vertical: 3.0),
+              child: Text(
+                product.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white),
+              ),
+            ),
+            Padding(
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
+              child: Text(
+                "\$${product.finalPrice.toStringAsFixed(2)}",
+                style: const TextStyle(
+                    color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
+              child: Text(
+                "Rating: ${product.rating}",
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.orange,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+  Widget _buildLiquidGlass({required Widget child, double borderRadius = 16}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white.withOpacity(0.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.15),
+                Colors.white.withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildStockStatus(Product product) {
     return Container(

@@ -330,3 +330,32 @@ class Logo(models.Model):
         if self.image:
             return self.image.url
         return ''
+# ===========Footer=========
+# Blog Section
+class Blog(models.Model):
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='blogs/')
+
+    def __str__(self):
+        return self.title
+
+# Partner Section
+class Partner(models.Model):
+    name = models.CharField(max_length=100)
+    logo = models.ImageField(upload_to='partners/')
+
+    def __str__(self):
+        return self.name
+
+# About Page Content
+class AboutPageContent(models.Model):
+    image = models.ImageField(upload_to='about/', blank=True, null=True)
+    title = models.CharField(max_length=200, default="About Sweet Shop")
+    description = models.TextField()
+    history_title = models.CharField(max_length=200, default="Our History")
+    history_description = models.TextField()
+    customers_title = models.CharField(max_length=200, default="Our Customers")
+    customers_map_image = models.ImageField(upload_to='maps/')
+
+    def __str__(self):
+        return self.title

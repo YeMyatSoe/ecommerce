@@ -31,11 +31,11 @@ class PopularPage extends StatelessWidget {
               crossAxisCount = 5;
               childAspectRatio = 0.7;
             } else if (constraints.maxWidth >= 1200) {
-              crossAxisCount = 4;
+              crossAxisCount = 6;
               childAspectRatio = 0.7;
             } else if (constraints.maxWidth >= 900) {
-              crossAxisCount = 3;
-              childAspectRatio = 0.75;
+              crossAxisCount = 4;
+              childAspectRatio = 0.65;
             } else if (constraints.maxWidth >= 600) {
               crossAxisCount = 2;
               childAspectRatio = 0.75;

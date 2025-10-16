@@ -9,8 +9,10 @@ import 'package:frontend/model/products.dart';
 import 'package:frontend/provider/auth_provider.dart';
 import 'package:frontend/provider/cart_provider.dart';
 import 'package:frontend/provider/wishlist_provider.dart';
+import 'package:frontend/screen/about.dart';
 import 'package:frontend/screen/category.dart';
 import 'package:frontend/screen/checkout.dart';
+import 'package:frontend/screen/contact.dart';
 import 'package:frontend/screen/homescreen.dart';
 import 'package:frontend/screen/login.dart';
 import 'package:frontend/screen/orderhistory.dart';
@@ -24,7 +26,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-
+import 'package:frontend/compoment/footer.dart';
 // --- THEME PROVIDER ---
 class ThemeProvider extends ChangeNotifier {
   bool _isDarkMode;
@@ -119,6 +121,10 @@ class _MyAppState extends State<MyApp> {
         '/checkout': (context) => CheckoutPage(),
         '/products': (context) => const ProductCategoryScreen(),
         '/category': (context) => const ProductCategoryScreen(),
+        '/about': (context) => const AboutPage(),
+        // '/terms': (context) => const TermsPage(),
+        // '/privacy': (context) => const PrivacyPage(),
+        '/contact': (context) => const ContactUsPage(),
       },
     );
   }
@@ -151,6 +157,8 @@ class _HomePageState extends State<HomePage> {
     const ShoppingCartScreen(),
     const ProfileScreen(),
     OrderHistoryScreen(),
+    const AboutPage(),
+    const ContactUsPage()
   ];
 
   void _onItemTapped(int index) {
@@ -196,93 +204,120 @@ class _HomePageState extends State<HomePage> {
           ),
         )
             : Text(appTitle),
-        actions: kIsWeb
-            ? [
-          IconButton(
-            icon: const Icon(Icons.home),
-            tooltip: 'Home',
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 0;
-                _isSearchBoxVisible = false;
-                _searchController.clear();
-              });
+        actions: [
+          Builder(
+            builder: (context) {
+              bool isMobile = MediaQuery.of(context).size.width < 600;
+
+              // Only show search icon on mobile
+              if (isMobile) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  tooltip: 'Search',
+                  onPressed: () {
+                    setState(() {
+                      _isSearchBoxVisible = !_isSearchBoxVisible;
+                      if (!_isSearchBoxVisible) _searchController.clear();
+                    });
+                  },
+                );
+              }
+
+              // Full menu for tablet/desktop
+              return Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        _isSearchBoxVisible = !_isSearchBoxVisible;
+                        if (!_isSearchBoxVisible) _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.home),
+                    tooltip: 'Home',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                        _isSearchBoxVisible = false;
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.category),
+                    tooltip: 'Categories',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                        _isSearchBoxVisible = false;
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.favorite),
+                    tooltip: 'Wishlist',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                        _isSearchBoxVisible = false;
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.question_mark),
+                    tooltip: 'About',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 6;
+                        _isSearchBoxVisible = false;
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.contact_page),
+                    tooltip: 'Contact_Us',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 7;
+                        _isSearchBoxVisible = false;
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    tooltip: 'Cart',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 3;
+                        _isSearchBoxVisible = false;
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.person),
+                    tooltip: 'Profile',
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                    },
+                  ),
+                ],
+              );
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.category),
-            tooltip: 'Categories',
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 1;
-                _isSearchBoxVisible = false;
-                _searchController.clear();
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.favorite),
-            tooltip: 'Wishlist',
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 2;
-                _isSearchBoxVisible = false;
-                _searchController.clear();
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => ShoppingCartScreen()));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ProfileScreen()));
-            },
-          ),
-        ]
-            : [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearchBoxVisible = !_isSearchBoxVisible;
-                if (!_isSearchBoxVisible) _searchController.clear();
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.app_registration),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => RegisterPage()));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => SettingsScreen(
-                        savedLanguage: widget.savedLanguage,
-                        onLanguageChanged:
-                        widget.onLanguageChanged,
-                      )));
-            },
-          ),
+          )
         ],
       ),
-      drawer: Sidebar(
+
+      drawer: MediaQuery.of(context).size.width < 600
+          ? Sidebar(
         title: appTitle,
         selectedIndex: _selectedIndex,
         onItemTapped: (index) {
@@ -292,13 +327,41 @@ class _HomePageState extends State<HomePage> {
             _searchController.clear();
           });
         },
-      ),
-      body: _isSearchBoxVisible && _searchController.text.isNotEmpty
-          ? ProductSearchResultsScreen(
-        key: ValueKey(_searchController.text),
-        query: _searchController.text,
       )
-          : _pages[_selectedIndex],
+          : null,
+      body: CustomScrollView( // Use CustomScrollView for advanced scrolling
+        slivers: [
+          SliverList(
+            delegate: SliverChildListDelegate(
+                [
+                  // Main Content Area: Wrap the currently selected page
+                  SizedBox(
+                    // Use the view port height as the minimum height
+                    // This ensures the footer is pushed off-screen if content is short
+                    height: MediaQuery.of(context).size.height -
+                        (AppBar().preferredSize.height) -
+                        (isMobile ? kBottomNavigationBarHeight : 0),
+                    width: double.infinity,
+                    child: _isSearchBoxVisible && _searchController.text.isNotEmpty
+                        ? ProductSearchResultsScreen(
+                      key: ValueKey(_searchController.text),
+                      query: _searchController.text,
+                    )
+                        : _pages[_selectedIndex], // Your main screen content
+                  ),
+                ]
+            ),
+          ),
+
+          // The Footer, placed as a separate sliver at the end
+          if (kIsWeb)
+            SliverToBoxAdapter(
+              child: const CustomFooter(),
+            ),
+        ],
+      ),
+
+
       bottomNavigationBar: !kIsWeb
           ? MyBottomBar(
         selectedIndex: _selectedIndex,

@@ -29,6 +29,8 @@ class _HomePageState extends State<HomeScreen> {
   bool isLoading = false;
   final _storage = const FlutterSecureStorage();
 
+  int _activeIndex = 0; // Active carousel index
+
   @override
   void initState() {
     super.initState();
@@ -49,10 +51,7 @@ class _HomePageState extends State<HomeScreen> {
   }
 
   Future<void> _fetchData() async {
-    setState(() {
-      isLoading = true;
-    });
-
+    setState(() => isLoading = true);
     try {
       final productService = ProductService();
       final results = await Future.wait([
@@ -95,8 +94,9 @@ class _HomePageState extends State<HomeScreen> {
     }
 
     return Scaffold(
-        backgroundColor: Colors.transparent, // let gradient show
-        body: Container(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Container(
           width: double.infinity,
           height: double.infinity,
           decoration: const BoxDecoration(
@@ -104,8 +104,8 @@ class _HomePageState extends State<HomeScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF6A11CB), // deep purple
-                Color(0xFF2575FC), // blue mix for liquid effect
+                Color(0xFF6A11CB),
+                Color(0xFF2575FC),
               ],
             ),
           ),
@@ -115,110 +115,102 @@ class _HomePageState extends State<HomeScreen> {
               child: SingleChildScrollView(
                 controller: _scrollController,
                 child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildBannerCarousel(),
-                const SizedBox(height: 30),
-
-                // Best Selling Section
-                _buildSectionTitle(
-                  "Best Selling",
-                      () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BestSellingPage(
-                          bestSellingProducts: bestSellingProducts),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildBannerCarousel(),
+                    const SizedBox(height: 12),
+                    _buildSectionTitle(
+                      "Best Selling",
+                          () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BestSellingPage(bestSellingProducts: bestSellingProducts),
+                        ),
+                      ),
+                      bestSellingProducts.length > 4,
                     ),
-                  ),
-                  bestSellingProducts.length > 4,
-                ),
-                _buildBestSellingSection(bestSellingProducts),
-
-                const SizedBox(height: 30),
-
-                // Popular Items Section
-                _buildSectionTitle(
-                  "Popular Items",
-                      () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PopularPage(
-                          popularProducts: products
-                              .where((p) => p.rating > 3.0)
-                              .toList()),
+                    _buildBestSellingSection(bestSellingProducts),
+                    const SizedBox(height: 20),
+                    _buildSectionTitle(
+                      "Popular Items",
+                          () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PopularPage(
+                            popularProducts: products.where((p) => p.rating > 3.0).toList(),
+                          ),
+                        ),
+                      ),
+                      products.where((p) => p.rating > 3.0).length > 4,
                     ),
-                  ),
-                  products.where((p) => p.rating > 3.0).length > 4,
-                ),
-                _buildCategorySection(
-                    products.where((p) => p.rating > 3.0).toList()),
-
-                const SizedBox(height: 30),
-
-                // Discount Items Section
-                _buildSectionTitle(
-                  "Discounts",
-                      () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DiscountPage(
-                          discountedProducts:
-                          products.where((p) => p.discount > 0).toList()),
+                    _buildCategorySection(products.where((p) => p.rating > 3.0).toList()),
+                    const SizedBox(height: 20),
+                    _buildSectionTitle(
+                      "Discounts",
+                          () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DiscountPage(
+                            discountedProducts: products.where((p) => p.discount > 0).toList(),
+                          ),
+                        ),
+                      ),
+                      products.where((p) => p.discount > 0).length > 4,
                     ),
-                  ),
-                  products.where((p) => p.discount > 0).length > 4,
+                    _buildCategorySection(products.where((p) => p.discount > 0).toList()),
+                    const SizedBox(height: 40),
+                  ],
                 ),
-                _buildCategorySection(
-                    products.where((p) => p.discount > 0).toList()),
-
-                const SizedBox(height: 50),
-              ],
+              ),
             ),
           ),
         ),
       ),
-     ),
     );
   }
 
   Widget _buildBannerCarousel() {
     double screenWidth = MediaQuery.of(context).size.width;
-    double carouselHeight = screenWidth * 0.5;
+    double carouselHeight = screenWidth * 0.4;
+
+    final bannerImages = banners.isEmpty
+        ? []
+        : banners.expand((banner) => banner.images.take(4)).toList();
+
+    if (bannerImages.isEmpty) {
+      return SizedBox(
+        height: carouselHeight,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return CarouselSlider(
       options: CarouselOptions(
         height: carouselHeight,
         autoPlay: true,
+        autoPlayInterval: const Duration(seconds: 3),
+        autoPlayAnimationDuration: const Duration(milliseconds: 800),
         enlargeCenterPage: true,
         viewportFraction: screenWidth < 600 ? 0.8 : 0.6,
-        enableInfiniteScroll: banners.length > 1,
+        enableInfiniteScroll: true,
+        scrollPhysics: const BouncingScrollPhysics(),
       ),
-      items: banners.isEmpty
-          ? [
-        SizedBox(
-          height: carouselHeight,
-          child: const Center(child: CircularProgressIndicator()),
-        )
-      ]
-          : banners.expand((banner) {
-        return banner.images.take(4).map((img) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: NetworkImage(img.image),
-                fit: BoxFit.fitWidth,
-              ),
+      items: bannerImages.map((img) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            image: DecorationImage(
+              image: NetworkImage(img.image),
+              fit: BoxFit.cover,
             ),
-          );
-        }).toList();
+          ),
+        );
       }).toList(),
     );
   }
 
-  Widget _buildSectionTitle(
-      String title, VoidCallback onPressed, bool hasMore) {
+  Widget _buildSectionTitle(String title, VoidCallback onPressed, bool hasMore) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -228,93 +220,178 @@ class _HomePageState extends State<HomeScreen> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           const Expanded(
             child: Divider(
               thickness: 1,
               indent: 12,
+              color: Colors.white54,
             ),
           ),
           if (hasMore)
-            TextButton(
+            TextButton.icon(
               onPressed: onPressed,
-              child: const Text("See More"),
+              icon: const Text(
+                "See More",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              label: const Icon(
+                Icons.chevron_right,
+                color: Colors.white,
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
             ),
         ],
       ),
     );
   }
 
+  // ------------------ BEST SELLING ------------------
   Widget _buildBestSellingSection(List<BestSellingProduct> bestSelling) {
     double screenWidth = MediaQuery.of(context).size.width;
-    bool isDesktop = screenWidth >= 1024;
 
-    var items = bestSelling.take(4).toList();
+    if (bestSelling.isEmpty) return const Center(child: Text("No best selling products available."));
 
-    if (bestSelling.isEmpty) {
-      return const Center(child: Text("No best selling products available."));
-    }
+    var items = bestSelling.take(8).toList();
+    bool useCarousel = screenWidth < 600;
 
-    return isDesktop
-        ? GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.7),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return _buildLiquidGlassCard(items[index].toProduct());
-      },
-    )
-        : CarouselSlider(
-      options: CarouselOptions(
+    if (useCarousel) {
+      return CarouselSlider.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index, realIndex) {
+          bool isActive = _activeIndex == index;
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: isActive ? 1.0 : 0.5,
+            child: AnimatedScale(
+              scale: isActive ? 1.05 : 0.9,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              child: _buildLiquidGlassCard(items[index].toProduct()),
+            ),
+          );
+        },
+        options: CarouselOptions(
           height: 260,
           viewportFraction: 0.6,
           enlargeCenterPage: true,
-          enableInfiniteScroll: false),
-      items: items
-          .map((p) => _buildLiquidGlassCard(p.toProduct()))
-          .toList(),
-    );
+          enableInfiniteScroll: false,
+          onPageChanged: (index, reason) {
+            setState(() => _activeIndex = index);
+          },
+        ),
+      );
+    } else {
+      double maxWidth = 1200;
+      double totalWidth = screenWidth > maxWidth ? maxWidth : screenWidth - 32;
+      double cardWidth = (totalWidth - 16 * (2 - 1)) / 2;
+      double cardHeight = 240;
+      double childAspectRatio = cardWidth / cardHeight;
+
+      return Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(12),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: childAspectRatio,
+            ),
+            itemCount: items.length,
+            itemBuilder: (context, index) => _buildLiquidGlassCard(items[index].toProduct()),
+          ),
+        ),
+      );
+    }
   }
 
+  // ------------------ CATEGORY SECTION ------------------
   Widget _buildCategorySection(List<Product> items) {
     double screenWidth = MediaQuery.of(context).size.width;
-    bool isDesktop = screenWidth >= 1024;
 
-    if (items.isEmpty) {
-      return const Center(child: Text("No products available."));
-    }
+    if (items.isEmpty) return const Center(child: Text("No products available."));
 
-    var visibleItems = items.take(4).toList();
+    int maxItems = 6;
+    var visibleItems = items.take(maxItems).toList();
+    bool useCarousel = screenWidth < 600;
 
-    return isDesktop
-        ? GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.75),
-      itemCount: visibleItems.length,
-      itemBuilder: (context, index) =>
-          _buildLiquidGlassCard(visibleItems[index]),
-    )
-        : CarouselSlider(
-      options: CarouselOptions(
+    if (useCarousel) {
+      return CarouselSlider.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index, realIndex) {
+          double diff = (index - _activeIndex).toDouble();
+
+          // Use a curve for smooth vertical movement
+          double verticalOffset = 20 * diff.abs(); // cards rise/fall slightly
+          double scale = 1.0 - (0.1 * diff.abs());
+          double opacity = 1.0 - (0.5 * diff.abs());
+
+          // Clamp values
+          scale = scale.clamp(0.8, 5.0);
+          opacity = opacity.clamp(0.3, 5.0);
+          verticalOffset = verticalOffset.clamp(0.0, 20.0);
+
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: opacity,
+            child: Transform.translate(
+              offset: Offset(4, verticalOffset),
+              child: AnimatedScale(
+                scale: scale,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.elasticOut,
+                child: _buildLiquidGlassCard(items[index]),
+              ),
+            ),
+          );
+        },
+        options: CarouselOptions(
           height: 260,
           viewportFraction: 0.6,
           enlargeCenterPage: true,
-          enableInfiniteScroll: false),
-      items: visibleItems.map((p) => _buildLiquidGlassCard(p)).toList(),
-    );
+          onPageChanged: (index, reason) {
+            setState(() => _activeIndex = index);
+          },
+        ),
+      );
+    } else {
+      double maxWidth = 1200;
+      double totalWidth = screenWidth > maxWidth ? maxWidth : screenWidth - 32;
+      double cardWidth = (totalWidth - 16 * (2 - 1)) / 2;
+      double cardHeight = 260;
+      double childAspectRatio = cardWidth / cardHeight;
+
+      return Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: childAspectRatio,
+            ),
+            itemCount: visibleItems.length,
+            itemBuilder: (context, index) => _buildLiquidGlassCard(visibleItems[index]),
+          ),
+        ),
+      );
+    }
   }
 
   // ------------------ LIQUID GLASS CARD ------------------
@@ -329,22 +406,12 @@ class _HomePageState extends State<HomeScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: Colors.white.withOpacity(0.2),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1.5,
-              ),
+              border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4)),
               ],
               gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.15),
-                  Colors.white.withOpacity(0.05),
-                ],
+                colors: [Colors.white.withOpacity(0.15), Colors.white.withOpacity(0.05)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -354,49 +421,37 @@ class _HomePageState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Image.network(
                       product.image1,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.broken_image,
-                          size: 60, color: Colors.grey),
+                      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 50, color: Colors.grey),
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
                   child: Text(
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.white),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
                   child: Text(
                     "\$${product.finalPrice.toStringAsFixed(2)}",
-                    style: const TextStyle(
-                        color: Colors.green, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
                   child: Text(
                     "Rating: ${product.rating}",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.orange,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.orange),
                   ),
                 ),
-                const SizedBox(height: 8),
               ],
             ),
           ),

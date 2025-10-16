@@ -147,143 +147,158 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue, // background
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        elevation: 0,
-        title: const Text(
-          "Product Categories",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // let gradient show
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF6A11CB), // deep purple
+              Color(0xFF2575FC), // blue mix
+            ],
+          ),
         ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
+        child: SafeArea(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildButtonSelection(
+                              label: "Category",
+                              selected: selectedCategory,
+                              onSelected: (String newCategory) {
+                                setState(() {
+                                  selectedCategory = newCategory;
+                                  if (selectedCategory == 'All') {
+                                    selectedCategoryId = -1;
+                                    resetFilters();
+                                  } else {
+                                    selectedCategoryId = categories.firstWhere(
+                                        (cat) =>
+                                            cat['name'] ==
+                                            selectedCategory)['id'];
+                                    loadBrands(selectedCategoryId);
+                                  }
+                                  loadProductData();
+                                });
+                              },
+                              items: [
+                                'All',
+                                ...categories.map((c) => c['name'] as String)
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            if (selectedCategory != 'All')
+                              _buildButtonSelection(
+                                label: "Brand",
+                                selected: selectedBrand,
+                                onSelected: (String newBrand) {
+                                  setState(() {
+                                    selectedBrand = newBrand;
+                                    if (selectedBrand == 'All') {
+                                      selectedBrandId = -1;
+                                      deviceModels = [];
+                                      selectedDeviceModel = 'All';
+                                      selectedDeviceModelId = -1;
+                                    } else {
+                                      selectedBrandId = brands.firstWhere((b) =>
+                                          b['name'] == selectedBrand)['id'];
+                                      loadDeviceModels(selectedBrandId);
+                                    }
+                                  });
+                                  loadProductData();
+                                },
+                                items: [
+                                  'All',
+                                  ...brands.map((b) => b['name'] as String)
+                                ],
+                              ),
+                            const SizedBox(height: 12),
+                            if (selectedBrand != 'All')
+                              _buildButtonSelection(
+                                label: "Device Model",
+                                selected: selectedDeviceModel,
+                                onSelected: (String newDeviceModel) {
+                                  setState(() {
+                                    selectedDeviceModel = newDeviceModel;
+                                    if (selectedDeviceModel == 'All') {
+                                      selectedDeviceModelId = -1;
+                                    } else {
+                                      selectedDeviceModelId =
+                                          deviceModels.firstWhere((d) =>
+                                              d['name'] ==
+                                              selectedDeviceModel)['id'];
+                                    }
+                                  });
+                                  loadProductData();
+                                },
+                                items: [
+                                  'All',
+                                  ...deviceModels
+                                      .map((d) => d['name'] as String)
+                                ],
+                              ),
+                            const SizedBox(height: 16),
+                            // Products Grid
+                            products.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                      'No products available for the selected filters.',
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.grey),
+                                    ),
+                                  )
+                                : GridView.builder(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount:
+                                          constraints.maxWidth >= 1200
+                                              ? 6
+                                              : constraints.maxWidth >= 800
+                                                  ? 3
+                                                  : constraints.maxWidth >= 600
+                                                      ? 2
+                                                      : 2,
+                                      childAspectRatio:
+                                          constraints.maxWidth >= 1200
+                                              ? 0.8
+                                              : constraints.maxWidth >= 800
+                                                  ? 0.75
+                                                  : 0.65,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                    ),
+                                    itemCount: products.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildProductCard(products[index]);
+                                    },
+                                  ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildButtonSelection(
-                      label: "Category",
-                      selected: selectedCategory,
-                      onSelected: (String newCategory) {
-                        setState(() {
-                          selectedCategory = newCategory;
-                          if (selectedCategory == 'All') {
-                            selectedCategoryId = -1;
-                            resetFilters();
-                          } else {
-                            selectedCategoryId = categories
-                                .firstWhere((cat) =>
-                            cat['name'] == selectedCategory)['id'];
-                            loadBrands(selectedCategoryId);
-                          }
-                          loadProductData();
-                        });
-                      },
-                      items: ['All', ...categories.map((
-                          c) => c['name'] as String)
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    if (selectedCategory != 'All')
-                      _buildButtonSelection(
-                        label: "Brand",
-                        selected: selectedBrand,
-                        onSelected: (String newBrand) {
-                          setState(() {
-                            selectedBrand = newBrand;
-                            if (selectedBrand == 'All') {
-                              selectedBrandId = -1;
-                              deviceModels = [];
-                              selectedDeviceModel = 'All';
-                              selectedDeviceModelId = -1;
-                            } else {
-                              selectedBrandId = brands
-                                  .firstWhere((b) =>
-                              b['name'] == selectedBrand)['id'];
-                              loadDeviceModels(selectedBrandId);
-                            }
-                          });
-                          loadProductData();
-                        },
-                        items: [
-                          'All',
-                          ...brands.map((b) => b['name'] as String)
-                        ],
-                      ),
-                    const SizedBox(height: 12),
-                    if (selectedBrand != 'All')
-                      _buildButtonSelection(
-                        label: "Device Model",
-                        selected: selectedDeviceModel,
-                        onSelected: (String newDeviceModel) {
-                          setState(() {
-                            selectedDeviceModel = newDeviceModel;
-                            if (selectedDeviceModel == 'All') {
-                              selectedDeviceModelId = -1;
-                            } else {
-                              selectedDeviceModelId = deviceModels
-                                  .firstWhere((d) =>
-                              d['name'] == selectedDeviceModel)['id'];
-                            }
-                          });
-                          loadProductData();
-                        },
-                        items: ['All', ...deviceModels.map((
-                            d) => d['name'] as String)
-                        ],
-                      ),
-                    const SizedBox(height: 16),
-                    // Products Grid
-                    products.isEmpty
-                        ? const Center(
-                      child: Text(
-                        'No products available for the selected filters.',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    )
-                        : GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: constraints.maxWidth >= 1200
-                            ? 4
-                            : constraints.maxWidth >= 800
-                            ? 3
-                            : constraints.maxWidth >= 600
-                            ? 2
-                            : 2,
-                        childAspectRatio: constraints.maxWidth >= 1200
-                            ? 0.8
-                            : constraints.maxWidth >= 800
-                            ? 0.75
-                            : 0.65,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                      ),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        return _buildProductCard(products[index]);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
         ),
       ),
     );
   }
+
   Widget _buildButtonSelection({
     required String label,
     required String selected,
@@ -303,49 +318,28 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
           runSpacing: 6,
           children: items.map((item) {
             bool isSelected = selected == item;
-            return GestureDetector(
-              onTap: () => onSelected(item),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(30), // full rounded corners
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    backgroundColor: isSelected
+                        ? Colors.blue.withOpacity(0.5)
+                        : Colors.green.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
-                      gradient: LinearGradient(
-                        colors: isSelected
-                            ? [
-                          Colors.green.withOpacity(0.9),
-                          Colors.green.withOpacity(0.9),
-                        ]
-                            : [
-                          Colors.blue.withOpacity(0.9),
-                          Colors.blue.withOpacity(0.9),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
-                    child: Text(
-                      item,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      ),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                  ),
+                  onPressed: () => onSelected(item),
+                  child: Text(
+                    item,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     ),
                   ),
                 ),
@@ -369,14 +363,15 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Image.network(
                       product.image1,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (context, error, stackTrace) =>
-                      const Center(child: Icon(Icons.broken_image, size: 50)),
+                          const Center(
+                              child: Icon(Icons.broken_image, size: 50)),
                     ),
                   ),
                   Positioned(
@@ -403,21 +398,36 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    product.name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text('\$${product.price}',
-                      style: const TextStyle(color: Colors.green)),
-                  Text('Rating: ${product.rating}',
-                      style: const TextStyle(color: Colors.orange)),
-                ],
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 3.0),
+              child: Text(
+                product.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white),
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
+              child: Text(
+                "\$${product.finalPrice.toStringAsFixed(2)}",
+                style: const TextStyle(
+                    color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
+              child: Text(
+                "Rating: ${product.rating}",
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.orange,
+                ),
               ),
             ),
           ],
@@ -433,21 +443,28 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white.withOpacity(0.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.25),
+                Colors.white.withOpacity(0.15),
                 Colors.white.withOpacity(0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1.2,
-            ),
           ),
-
           child: child,
         ),
       ),

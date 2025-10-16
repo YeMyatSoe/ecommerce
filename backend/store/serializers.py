@@ -301,3 +301,52 @@ class LogoSerializer(serializers.ModelSerializer):
         if obj.image and request:
             return request.build_absolute_uri(obj.image.url)
         return None
+
+# ===============Footer=========
+from .models import AboutPageContent, Blog, Partner
+
+class BlogSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Blog
+        fields = ['id', 'title', 'image_url']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.image.url)
+
+class PartnerSerializer(serializers.ModelSerializer):
+    logo_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Partner
+        fields = ['id', 'name', 'logo_url']
+
+    def get_logo_url(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.logo.url)
+
+class AboutPageContentSerializer(serializers.ModelSerializer):
+    blogs = BlogSerializer(many=True, read_only=True)
+    partners = PartnerSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = AboutPageContent
+        fields = [
+            'image',
+            'title',
+            'description',
+            'history_title',
+            'history_description',
+            'customers_title',
+            'customers_map_image',
+            'blogs',
+            'partners'
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        data['customers_map_image'] = request.build_absolute_uri(instance.customers_map_image.url)
+        return data

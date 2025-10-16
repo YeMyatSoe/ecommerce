@@ -54,6 +54,7 @@ dependencies:
   jwt_decode: ^0.3.1 
   cached_network_image: ^3.2.0
   lottie: ^3.3.1
+  responsive_builder: ^0.7.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

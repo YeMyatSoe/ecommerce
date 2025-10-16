@@ -25,7 +25,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   String? promoCodeMessage;
   List<Product> products = [];
   bool _isDataFetched = false;
-
+  int _activeIndex = 0; // Active carousel index
   @override
   void initState() {
     super.initState();
@@ -98,8 +98,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               SizedBox(height: 20),
               _checkoutButton(),
               SizedBox(height: 20),
-              _recommendProduct("Recommended Items"),
-              SizedBox(height: 50),
+            _recommendProduct("Recommended", products),
+            SizedBox(height: 50),
             ],
           ),
         );
@@ -109,12 +109,21 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   Widget _buildScaffold(Widget bodyContent) {
     return Scaffold(
-      backgroundColor: Colors.blue, // background
-      appBar: AppBar(
-        title: Text('Shopping Cart', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Center(
+        backgroundColor: Colors.transparent, // let gradient show
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF6A11CB), // deep purple
+                Color(0xFF2575FC), // blue mix
+              ],
+            ),
+          ),
+      child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 1200),
           child: SingleChildScrollView(
@@ -123,6 +132,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -155,81 +165,126 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           elevation: 5,
           child: Padding(
             padding: EdgeInsets.all(15),
+// Refactored Row content using Spacer for controlled, equal gaps
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Product image
+                // === 1. LEFT: Product Image ===
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(
                     cartItem.product.image1,
-                    width: 90,
-                    height: 90,
+                    width: 80,
+                    height: 80,
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(width: 15),
 
-                // Product details
+                // **KEY CHANGE:** Explicit Spacer (Gap 1)
+                // Uses 1/4 of the available remaining space for the first gap
+                Spacer(flex: 2),
+
+                // === 2. CENTER: Product Details, Color & Quantity Controls (Expanded) ===
                 Expanded(
+                  // We keep Expanded here to ensure the name and details wrap nicely,
+                  // but the use of Spacer(flex: 1) before and after controls the
+                  // horizontal space around this block.
+                  flex: 5, // Give the content block most of the remaining flexible space
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(cartItem.product.name,
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
-                      // Text('Price: \$${cartItem.product.finalPrice}'),
-                      // Text('Brand: ${cartItem.product.brand}'),
+                      // Product Name
+                      Text(
+                        cartItem.product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+
+                      SizedBox(height: 4),
+
+                      // Color Indicator
                       if (cartItem.selectedColor != null) ...[
-                        // SizedBox(height: 5),
-                        // Text('Color: ${cartItem.selectedColor!.colorName}'),
-                        SizedBox(height: 5),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Color(int.parse(
-                                '0xFF${cartItem.selectedColor!.colorCode.replaceAll("#", "")}')),
-                            shape: BoxShape.circle,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              'Color:',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                            ),
+                            SizedBox(width: 5),
+                            Container(
+                              width: 15,
+                              height: 15,
+                              decoration: BoxDecoration(
+                                color: Color(int.parse(
+                                    '0xFF${cartItem.selectedColor!.colorCode.replaceAll("#", "")}')),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300, width: 1),
+                              ),
+                            ),
+                          ],
                         ),
+                        SizedBox(height: 8),
                       ],
-                      // Quantity controls
+
+                      // Quantity Controls
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: Icon(Icons.remove_circle, color: Colors.red),
-                            onPressed: () async {
+                          InkWell(
+                            onTap: () async {
                               await cartProvider.decrementQuantity(cartItem);
-                              _showMessage("Quantity decremented!");
+                              // _showMessage("Quantity decremented!");
                             },
+                            child: Icon(Icons.remove_circle_outline, color: Colors.red, size: 16),
                           ),
-                          Text('${cartItem.quantity}'),
-                          IconButton(
-                            icon: Icon(Icons.add_circle, color: Colors.green),
-                            onPressed: () async {
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              '${cartItem.quantity}',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
                               await cartProvider.incrementQuantity(cartItem);
-                              _showMessage("Quantity incremented!");
+                              // _showMessage("Quantity incremented!");
                             },
+                            child: Icon(Icons.add_circle_outline, color: Colors.green, size: 16),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                
-                // Total price & delete
+
+                // **KEY CHANGE:** Explicit Spacer (Gap 2)
+                // Uses 1/4 of the available remaining space for the second gap
+                Spacer(flex: 1),
+
+                // === 3. RIGHT: Total Price & Delete Button ===
                 Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('\$${cartItem.totalPrice}',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green)),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () async {
+                    // Total Price
+                    Text(
+                      '\$${cartItem.totalPrice.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[700],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    // Delete Button
+                    InkWell(
+                      onTap: () async {
                         await cartProvider.removeFromCart(cartItem);
-                        _showMessage("Item removed!");
+                        // _showMessage("Item removed!");
                       },
+                      child: Icon(Icons.delete_forever, color: Colors.red.shade600, size: 26),
                     ),
                   ],
                 ),
@@ -277,7 +332,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
 
 
-  Widget _recommendProduct(String title) {
+  Widget _recommendProduct(String title, List<Product> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -304,19 +359,40 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
             else if (constraints.maxWidth > 600) viewportFraction = 0.45;
 
             return CarouselSlider.builder(
-              itemCount: products.length,
+              itemCount: items.length,
               itemBuilder: (context, index, realIndex) {
-                final product = products[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: _buildLiquidGlassCard(product), // 👈 using your new style
+                double diff = (index - _activeIndex).toDouble();
+
+                // Smooth vertical movement
+                double verticalOffset = 20 * diff.abs();
+                double scale = 1.0 - (0.1 * diff.abs());
+                double opacity = 1.0 - (0.5 * diff.abs());
+
+                scale = scale.clamp(0.8, 5.0);
+                opacity = opacity.clamp(0.3, 5.0);
+                verticalOffset = verticalOffset.clamp(0.0, 20.0);
+
+                return AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: opacity,
+                  child: Transform.translate(
+                    offset: Offset(4, verticalOffset),
+                    child: AnimatedScale(
+                      scale: scale,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.elasticOut,
+                      child: _buildLiquidGlassCard(items[index]),
+                    ),
+                  ),
                 );
               },
               options: CarouselOptions(
-                height: 300,
+                height: 260,
+                viewportFraction: 0.6,
                 enlargeCenterPage: true,
-                viewportFraction: viewportFraction,
-                enableInfiniteScroll: true,
+                onPageChanged: (index, reason) {
+                  setState(() => _activeIndex = index);
+                },
               ),
             );
           },

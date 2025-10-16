@@ -7,7 +7,8 @@ import nested_admin # <-- Add Group here
 from .models import (
     ProductColorImage, ProductColorSize, Role, Shop, Employee, Banner, BannerImage, Cart, CartItem, Color,
     Order, OrderItem, Product, Category, Brand, DeviceModel, Reply, Review,
-    ShopInventory, Size, Wishlist, SalesSummary, Logo
+    ShopInventory, Size, Wishlist, SalesSummary, Logo, AboutPageContent, Blog, Partner
+
 )
 from django.contrib.admin import TabularInline
 from django.db.models import Sum, Q
@@ -688,3 +689,6 @@ class SalesSummaryAdmin(admin.ModelAdmin):
         return response
     
 admin.site.register(Logo)
+admin.site.register(AboutPageContent)
+admin.site.register(Blog)
+admin.site.register(Partner)

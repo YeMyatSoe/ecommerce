@@ -37,8 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final imageCardHeight = screenHeight * 0.25;
-    final loginCardHeight = screenHeight * 0.35;
+    final imageCardHeight = screenHeight * 0.20;
+    final loginCardHeight = screenHeight * 0.44;
 
     return Scaffold(
       body: Container(

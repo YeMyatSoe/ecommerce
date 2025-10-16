@@ -777,79 +777,75 @@ body: SingleChildScrollView(
       ),
     );
   }
-
   Widget _buildMainProductImage() {
     double screenWidth = MediaQuery.of(context).size.width;
 
-    // Responsive size
-    double imageSize;
+    double imageWidth;
     if (screenWidth < 400) {
-      imageSize = screenWidth * 0.7; // small mobile
+      imageWidth = screenWidth * 0.7; // small mobile
     } else if (screenWidth < 800) {
-      imageSize = screenWidth * 0.5; // tablet / medium screen
+      imageWidth = screenWidth * 0.5; // tablet
     } else {
-      imageSize = screenWidth * 0.28; // desktop
+      imageWidth = screenWidth * 0.28; // desktop
     }
 
     return Center(
       child: _currentImage.isNotEmpty
-          ? AnimatedContainer(
-              width: imageSize,
-              height: imageSize,
-              duration: Duration(milliseconds: 500),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 12.0,
-                    offset: Offset(0, 8),
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.6),
-                    blurRadius: 8.0,
-                    spreadRadius: -4.0,
-                    offset: Offset(0, -4),
-                  ),
-                ],
-                gradient: LinearGradient(
-                  colors: [Colors.blue.withOpacity(0.2), Colors.transparent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Image.network(
-                  _currentImage,
-                  width: imageSize,
-                  height: imageSize,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            )
-          : Container(
-              width: imageSize,
-              height: imageSize,
-              decoration: BoxDecoration(
-                color: Colors.green.shade300,
-                borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10.0,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.image,
-                  color: Colors.white,
-                  size: imageSize * 0.18, // scale icon size too
-                ),
-              ),
+          ? Container(
+        width: imageWidth,
+        // let height adjust automatically to preserve aspect ratio
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 12.0,
+              offset: Offset(0, 8),
             ),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.6),
+              blurRadius: 8.0,
+              spreadRadius: -4.0,
+              offset: Offset(0, -4),
+            ),
+          ],
+          gradient: LinearGradient(
+            colors: [Colors.blue.withOpacity(0.2), Colors.transparent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: Image.network(
+            _currentImage,
+            width: imageWidth,
+            fit: BoxFit.contain, // preserves original aspect ratio
+          ),
+        ),
+      )
+          : Container(
+        width: imageWidth,
+        height: imageWidth * 1.4, // roughly match 464x650 ratio
+        decoration: BoxDecoration(
+          color: Colors.green.shade300,
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10.0,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Icon(
+            Icons.image,
+            color: Colors.white,
+            size: imageWidth * 0.18,
+          ),
+        ),
+      ),
     );
   }
 

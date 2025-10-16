@@ -1298,3 +1298,23 @@ class LogoView(APIView):
         logo = Logo.objects.last()  # get latest logo
         serializer = LogoSerializer(logo, context={'request': request})
         return Response(serializer.data)
+
+
+# ====================Footer=============
+from .models import AboutPageContent, Blog, Partner
+from .serializers import AboutPageContentSerializer, BlogSerializer, PartnerSerializer
+
+class AboutPageAPIView(APIView):
+    def get(self, request):
+        try:
+            content = AboutPageContent.objects.first()  # Assuming only one About page
+            blogs = Blog.objects.all()
+            partners = Partner.objects.all()
+
+            content_data = AboutPageContentSerializer(content, context={'request': request}).data
+            content_data['blogs'] = BlogSerializer(blogs, many=True, context={'request': request}).data
+            content_data['partners'] = PartnerSerializer(partners, many=True, context={'request': request}).data
+
+            return Response(content_data, status=status.HTTP_200_OK)
+        except AboutPageContent.DoesNotExist:
+            return Response({"detail": "About content not found."}, status=status.HTTP_404_NOT_FOUND)

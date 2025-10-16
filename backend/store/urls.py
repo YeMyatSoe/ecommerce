@@ -5,7 +5,7 @@ from .views import (
     BannerViewSet, BrandViewSet, CartViewSet, CategoryViewSet, ColorViewSet, DeviceModelViewSet,
     LikeReviewView, LoginView, OrderDetailView, ProductColorImagesView, ProductRetrieveByNameView, ProductRetrieveView,
     ProfileUpdateView, ProfileView, ReplyReviewView, ReviewViewSet, SizeViewSet, TokenVerifyView, UserViewSet,
-    WishlistDetail, WishlistList, submit_cart)
+    WishlistDetail, WishlistList, submit_cart, AboutPageAPIView)
 from .views import LogoView
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -51,4 +51,5 @@ urlpatterns = [
     path('checkorder/<int:order_id>/', OrderDetailView.as_view(), name='checkorder'),
     path('products/<int:product_id>/color-images/', ProductColorImagesView.as_view(), name='product-color-images'),
     path('logo/', LogoView.as_view(), name='logo-api'),
+    path('about/', AboutPageAPIView.as_view(), name='about-page'),
 ]

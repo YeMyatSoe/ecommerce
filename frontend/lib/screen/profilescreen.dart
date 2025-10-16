@@ -109,12 +109,6 @@ Widget build(BuildContext context) {
 
   return Scaffold(
     backgroundColor: Colors.blue, // background
-    appBar: AppBar(
-
-      title: Text("Profile"),
-      backgroundColor: Colors.white,
-      elevation: 0,
-    ),
     body: Center( // Center the content horizontally
       child: Container(
         width: screenWidth < maxContentWidth ? screenWidth : maxContentWidth, // Limit max width
