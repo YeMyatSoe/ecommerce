@@ -331,45 +331,66 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
 
-
   Widget _recommendProduct(String title, List<Product> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section Title
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive carousel height
+        double carouselHeight;
+
+        if (constraints.maxWidth >= 1400) {
+          carouselHeight = 420; // large desktop
+        } else if (constraints.maxWidth >= 1200) {
+          carouselHeight = 390; // desktop
+        } else if (constraints.maxWidth >= 800) {
+          carouselHeight = 390; // tablet landscape
+        } else if (constraints.maxWidth >= 600) {
+          carouselHeight = 340; // tablet portrait
+        } else {
+          carouselHeight = 260; // mobile
+        }
+
+        // Responsive viewport fraction
+        double viewportFraction;
+        if (constraints.maxWidth >= 1400) {
+          viewportFraction = 0.25;
+        } else if (constraints.maxWidth >= 1000) {
+          viewportFraction = 0.35;
+        } else if (constraints.maxWidth >= 800) {
+          viewportFraction = 0.45;
+        } else if (constraints.maxWidth >= 600) {
+          viewportFraction = 0.6;
+        } else {
+          viewportFraction = 0.8;
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-        // Carousel
-        LayoutBuilder(
-          builder: (context, constraints) {
-            double viewportFraction = 0.9;
-            if (constraints.maxWidth > 1200) viewportFraction = 0.22;
-            else if (constraints.maxWidth > 800) viewportFraction = 0.3;
-            else if (constraints.maxWidth > 600) viewportFraction = 0.45;
-
-            return CarouselSlider.builder(
+            // Carousel
+            CarouselSlider.builder(
               itemCount: items.length,
               itemBuilder: (context, index, realIndex) {
                 double diff = (index - _activeIndex).toDouble();
-
-                // Smooth vertical movement
                 double verticalOffset = 20 * diff.abs();
                 double scale = 1.0 - (0.1 * diff.abs());
                 double opacity = 1.0 - (0.5 * diff.abs());
 
-                scale = scale.clamp(0.8, 5.0);
-                opacity = opacity.clamp(0.3, 5.0);
+                scale = scale.clamp(0.8, 1.0);
+                opacity = opacity.clamp(0.3, 1.0);
                 verticalOffset = verticalOffset.clamp(0.0, 20.0);
 
                 return AnimatedOpacity(
@@ -387,17 +408,17 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 );
               },
               options: CarouselOptions(
-                height: 260,
-                viewportFraction: 0.6,
+                height: carouselHeight,
+                viewportFraction: viewportFraction,
                 enlargeCenterPage: true,
                 onPageChanged: (index, reason) {
                   setState(() => _activeIndex = index);
                 },
               ),
-            );
-          },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -293,7 +293,7 @@ class _HomePageState extends State<HomeScreen> {
       double maxWidth = 1200;
       double totalWidth = screenWidth > maxWidth ? maxWidth : screenWidth - 32;
       double cardWidth = (totalWidth - 16 * (2 - 1)) / 2;
-      double cardHeight = 240;
+      double cardHeight = 340;
       double childAspectRatio = cardWidth / cardHeight;
 
       return Center(
@@ -305,8 +305,8 @@ class _HomePageState extends State<HomeScreen> {
             padding: const EdgeInsets.all(12),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
+              mainAxisSpacing: 30,
+              crossAxisSpacing: 30,
               childAspectRatio: childAspectRatio,
             ),
             itemCount: items.length,
@@ -370,7 +370,7 @@ class _HomePageState extends State<HomeScreen> {
       double maxWidth = 1200;
       double totalWidth = screenWidth > maxWidth ? maxWidth : screenWidth - 32;
       double cardWidth = (totalWidth - 16 * (2 - 1)) / 2;
-      double cardHeight = 260;
+      double cardHeight = 340;
       double childAspectRatio = cardWidth / cardHeight;
 
       return Center(
@@ -382,8 +382,8 @@ class _HomePageState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
+              mainAxisSpacing: 30,
+              crossAxisSpacing: 30,
               childAspectRatio: childAspectRatio,
             ),
             itemCount: visibleItems.length,

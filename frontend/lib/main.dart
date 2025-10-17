@@ -189,6 +189,7 @@ class _HomePageState extends State<HomePage> {
     bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
+
       appBar: AppBar(
         title: _isSearchBoxVisible
             ? TextField(
@@ -360,20 +361,17 @@ class _HomePageState extends State<HomePage> {
             ),
         ],
       ),
-
-
       bottomNavigationBar: !kIsWeb
-          ? MyBottomBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: (index) {
-          setState(() {
-            _selectedIndex = index;
-            _isSearchBoxVisible = false;
-            _searchController.clear();
-          });
-        },
-        cartItemCount:
-        Provider.of<CartProvider>(context).totalQuantity,
+          ? SizedBox(
+        height: MyBottomBar.barHeight , // ✅ include curve
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: MyBottomBar(
+            selectedIndex: _selectedIndex,
+            onItemTapped: _onItemTapped,
+            cartItemCount: Provider.of<CartProvider>(context).totalQuantity,
+          ),
+        ),
       )
           : null,
     );

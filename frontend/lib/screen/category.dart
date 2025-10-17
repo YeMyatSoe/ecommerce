@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:frontend/model/products.dart';
 import 'package:frontend/screen/product_detail.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/services/category_service.dart';
-import 'dart:ui';
+
+import '../compoment/bottombar.dart';
+
 
 class ProductCategoryScreen extends StatefulWidget {
   const ProductCategoryScreen({super.key});
@@ -261,33 +264,33 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
                                     ),
                                   )
                                 : GridView.builder(
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount:
-                                          constraints.maxWidth >= 1200
-                                              ? 6
-                                              : constraints.maxWidth >= 800
-                                                  ? 3
-                                                  : constraints.maxWidth >= 600
-                                                      ? 2
-                                                      : 2,
-                                      childAspectRatio:
-                                          constraints.maxWidth >= 1200
-                                              ? 0.8
-                                              : constraints.maxWidth >= 800
-                                                  ? 0.75
-                                                  : 0.65,
-                                      crossAxisSpacing: 8,
-                                      mainAxisSpacing: 8,
-                                    ),
-                                    itemCount: products.length,
-                                    itemBuilder: (context, index) {
-                                      return _buildProductCard(products[index]);
-                                    },
-                                  ),
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              padding: EdgeInsets.fromLTRB(
+                                8, 8, 8,
+                                8 + MyBottomBar.barHeight  // space for bottom bar
+                              ),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: constraints.maxWidth >= 1200
+                                    ? 6
+                                    : constraints.maxWidth >= 800
+                                    ? 3
+                                    : constraints.maxWidth >= 600
+                                    ? 2
+                                    : 2,
+                                childAspectRatio: constraints.maxWidth >= 1200
+                                    ? 0.8
+                                    : constraints.maxWidth >= 800
+                                    ? 0.75
+                                    : 0.65,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                              ),
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                return _buildProductCard(products[index]);
+                              },
+                            ),
                           ],
                         ),
                       ),

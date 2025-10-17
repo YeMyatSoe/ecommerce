@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:ui';
 
+import '../compoment/bottombar.dart';
+
 final _storage = FlutterSecureStorage();
 
 class WishlistScreen extends StatefulWidget {
@@ -121,7 +123,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       }
 
                       return GridView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.fromLTRB(
+                          16, // left
+                          16, // top
+                          16, // right
+                          16 + MyBottomBar.barHeight , // bottom padding
+                        ),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: crossAxisCount,
                           childAspectRatio: childAspectRatio,
@@ -134,6 +141,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           return _buildProductCard(product);
                         },
                       );
+
                     },
                   ),
       ),
